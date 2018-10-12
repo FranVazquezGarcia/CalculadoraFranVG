@@ -5,6 +5,7 @@
  */
 package es.albarregas.beans;
 
+import es.albarregas.exceptions.DivisionPorCeroException;
 import java.io.Serializable;
 
 /**
@@ -15,7 +16,16 @@ public class Atributos implements Serializable{
     private double operando1;
     private double operando2;
     private double resultado;
+    private String operacion;
 
+    public String getOperacion() {
+        return operacion;
+    }
+
+    public void setOperacion(String operacion) {
+        this.operacion = operacion;
+    }
+    
     public double getOperando1() {
         return operando1;
     }
@@ -36,7 +46,10 @@ public class Atributos implements Serializable{
         return resultado;
     }
 
-    public void setResultado(double resultado) {
+    public void setResultado(double resultado) throws DivisionPorCeroException {
+         if(Double.isInfinite(resultado)){
+              throw new DivisionPorCeroException("No se puede dividir por 0.");
+         }
         this.resultado = resultado;
     }
 
