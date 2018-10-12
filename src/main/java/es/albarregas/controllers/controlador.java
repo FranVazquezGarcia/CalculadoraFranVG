@@ -6,12 +6,18 @@
 package es.albarregas.controllers;
 
 import es.albarregas.beans.Atributos;
+import es.albarregas.exceptions.DivisionPorCeroException;
 import es.albarregas.models.Divisor;
 import es.albarregas.models.Multiplicador;
 import es.albarregas.models.Restador;
 import es.albarregas.models.Sumador;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -63,7 +69,7 @@ public class controlador extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("error", "Se esta intentando acceder directamente");
+        request.setAttribute("error", "Se esta intentando acceder al controlador sin pasar por la calculadora.");
         request.getRequestDispatcher("JSP/error.jsp").forward(request,response);
     }
 
@@ -78,48 +84,57 @@ public class controlador extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+       
         String url=null;
         String operacion=request.getParameter("calculo");
         Atributos misAtributos=new Atributos();
         try{
-            double operando1=Integer.parseInt(request.getParameter("operando1"));
-            double operando2=Integer.parseInt(request.getParameter("operando2"));
+            
+            
+            double operando1=Double.parseDouble(request.getParameter("operando1"));
+            double operando2=Double.parseDouble(request.getParameter("operando2"));
             misAtributos.setOperando1(operando1);
             misAtributos.setOperando2(operando2);
             switch(operacion){
                 case "suma":
                     Sumador miSuma=new Sumador();
                     misAtributos.setResultado(miSuma.sumar(operando1, operando2));
-                    url="JSP/resultado.jsp";
+                    misAtributos.setOperacion("+");
                     break;
                 case "resta":
                     Restador miResta=new Restador();
                     misAtributos.setResultado(miResta.restar(operando1, operando2));
-                    url="JSP/resultado.jsp";
+                    misAtributos.setOperacion("-");
                     break;
                 case "multiplicacion":
                     Multiplicador miMulti=new Multiplicador();
                     misAtributos.setResultado(miMulti.multiplicar(operando1, operando2));
-                    url="JSP/resultado.jsp";
+                    misAtributos.setOperacion("*");
                     break;
                 case "division":
-                    if (operando2==0){
-                        url="JSP/error.jsp";
-                        request.setAttribute("error", "Se esta intentando dividir por 0");
-                    }else{
-                        Divisor miDivisor=new Divisor();
-                        misAtributos.setResultado(miDivisor.dividir(operando1, operando2));
-                        url="JSP/resultado.jsp";
-                    }
+                    Divisor miDivisor=new Divisor();
+                    misAtributos.setResultado(miDivisor.dividir(operando1, operando2));
+                    url="JSP/resultado.jsp";
+                    misAtributos.setOperacion("/");
                     break;
             }
-            
-        request.setAttribute("resultado", misAtributos.getResultado());
+                request.setAttribute("resultado", misAtributos);
+                url="JSP/resultado.jsp";
+                
+        
         }catch(NumberFormatException excepcion){
             url="JSP/error.jsp";
-            request.setAttribute("error", "Se han introducido valores no válidos, se deben introducir valores numericos");
+            request.setAttribute("error", "Se han introducido valores no válidos, se deben introducir valores numéricos.");
+        }catch(DivisionPorCeroException excepcion){
+            url="JSP/error.jsp";
+            request.setAttribute("error", excepcion.toString());
         }
-        
+        int anio= LocalDate.now().getYear();
+        Month mes = LocalDate.now().getMonth();
+        DayOfWeek dia= LocalDate.now().getDayOfWeek();
+        int numDia=LocalDate.now().getDayOfMonth();
+        String fecha="Cálculo realizado el "+dia.getDisplayName(TextStyle.FULL, new Locale("es", "ES"))+" "+numDia+" de "+mes.getDisplayName(TextStyle.FULL, new Locale("es", "ES"))+" de "+anio;
+        request.setAttribute("fecha", fecha);        
         request.getRequestDispatcher(url).forward(request,response);
         processRequest(request, response);
     }
