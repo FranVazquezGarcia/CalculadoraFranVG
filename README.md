@@ -1,5 +1,5 @@
 # CalculadoraFranVG
-Commit 11/10/2018
+Commit 12/10/2018
 -Para esta aplicacion se va a crear primero el index.jsp, que muestra al usuario una pantalla con varios inputs, 2 de ellos le pide dos valores
 numéricos al usuario y hay 4 inputs de tipo radio que segun el que se seleccione se sumara, restara, dividira o multiplicara.
 Tambien hay 2 botones, limpiar, y enviar, este ultimo llamara al Servlet controlador.java, que esta en el paquete es.albarregas.beans.
